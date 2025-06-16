@@ -1,6 +1,8 @@
-import kagglehub
+import pandas as pd
 
-# Download latest version
-path = kagglehub.dataset_download("conorsully1/credit-score")
+path = "../dataset/credit_score.csv"
+dataset = pd.read_csv(path)
+print(dataset.head())
 
-print("Path to dataset files:", path)
+print("Dataset dimensions:", dataset.shape)
+print("Column names:", dataset.columns.tolist())
