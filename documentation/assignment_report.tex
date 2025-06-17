@@ -1,0 +1,148 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[greek, english]{babel}
+\usepackage{graphicx}       % For including images
+\usepackage{amsmath, amssymb} % For mathematical symbols and formulas
+\usepackage{mathtools}
+\usepackage{geometry}       % To set page margins
+\usepackage{hyperref}       % For clickable links and references
+\usepackage{caption}        % For better caption control
+\usepackage{listings}
+\usepackage{lipsum}
+\usepackage{float}
+\usepackage[table, xcdraw]{xcolor}
+\usepackage{listingsutf8}
+\usepackage{enumitem}
+\usepackage{underscore}
+\usepackage{kerkis}
+\usepackage{tcolorbox}
+\usepackage{bm}
+\usepackage{array}
+\usepackage{textcomp}
+
+\DeclareMathOperator{\argmin}{argmin}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\cov}{Cov}
+
+\definecolor{lightblue}{RGB}{200,230,240}
+\definecolor{borderblue}{RGB}{100, 149, 237}
+
+% Define the Darcula background color
+\definecolor{darculaBackground}{RGB}{43, 43, 43} % This is an approximation of Darcula background color
+\definecolor{darculaText}{RGB}{169, 183, 198} % Light gray text color
+\definecolor{darculaKeyword}{RGB}{204, 120, 50} % Orange keyword color
+\definecolor{darculaString}{RGB}{106, 135, 89} % Green string color
+\definecolor{darculaComment}{RGB}{128, 128, 128} % Gray comment color
+
+% Define Cobalt colors
+\definecolor{cobaltBackground}{RGB}{51,68, 96}
+\definecolor{cobaltText}{RGB}{221, 221, 221}
+\definecolor{cobaltKeyword}{RGB}{127, 219, 255}
+\definecolor{cobaltString}{RGB}{152, 195, 121}
+\definecolor{cobaltComment}{RGB}{100, 120, 140}
+\definecolor{cobaltNumber}{RGB}{255, 85, 85}
+
+\definecolor{lightgray}{gray}{0.9}
+\newtheorem{exercise}{Άσκηση}
+
+\lstset{
+    language=R,
+    frame=single,
+%    backgroundcolor=\color{lightgray},
+    backgroundcolor=\color{lightblue},
+ %   basicstyle=\color{cobaltText}\ttfamily,
+ %   keywordstyle=\color{white}\bfseries,
+ %   stringstyle=\color{white},
+ %   commentstyle=\color{cobaltComment}\itshape,
+ %   numberstyle=\small\color{cobaltNumber},
+ %   rulecolor=\color{cobaltBackground},
+    basicstyle=\ttfamily\small,
+%    linewidth=.7\textwidth,
+    inputencoding=utf8,
+    extendedchars=true,
+    captionpos=b, % Position the caption at the bottom
+    caption=R code,
+    float=H,
+    aboveskip=0pt, % Remove space above
+    belowskip=0pt, % Remove space below
+    aboveskip=0.3cm,
+    belowskip=0.3cm,
+    showstringspaces=false,
+    mathescape=false,
+    literate={\$}{\textdollar}1  % Replace $ with \textdollar
+}
+
+\newenvironment{english}{
+\begin{otherlanguage}{english}
+}{
+\end{otherlanguage}
+}
+
+\newenvironment{custombox}[1]{%
+ \begin{tcolorbox}[
+     colback=blue!5,
+     colframe=blue!75!black,
+     arc=8pt
+  ]%
+  \noindent\textbf{\underline{#1.}\hspace{3pt}}
+}{%
+\end{tcolorbox}
+\noindent
+}
+
+\newenvironment{tbox}{%
+ \begin{tcolorbox}[
+     colback=blue!5,
+     colframe=blue!75!black,
+     arc=8pt
+  ]%
+}{%
+\end{tcolorbox}
+\noindent
+}
+
+\newenvironment{bitemize}{
+\begin{itemize}[label = \(\bullet\)]
+}{
+\end{itemize}
+}
+
+\setlength{\parindent}{2em}
+\newcommand{\tl}{\textlatin}
+\renewcommand{\tt}[1]{\textlatin{\texttt{#1}}}
+\renewcommand{\bf}[1]{\textbf{#1}}
+\newcommand{\sumi}{\ensuremath{\sum_{i=1}^n}}
+\newcommand{\ul}[1]{\underline{\textbf{#1}}}
+
+\newcommand{\image}[3]{
+\begin{figure}[H]
+\centering
+\includegraphics[scale=#1]{#2}
+\caption{#3}
+\end{figure}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%Local Commands%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\tbullet}{\(\bullet\quad\)}
+\newcommand{\wb}{\tl{Weibull}}
+\newcommand{\dwb}{\ensuremath{Weibull(k, \lambda)}}
+\renewcommand{\k}{\ensuremath{k}}
+\renewcommand{\l}{\ensuremath{\lambda}}
+\newcommand{\code}[1]{\textlatin{\texttt{#1}}}
+\renewcommand{\newline}{\vspace{.1cm}\par}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Page layout
+\geometry{top=2cm, bottom=2cm, left=1cm, right=1cm}
+%opening
+\title{Σύγχρονα Συστήματα Προβλέψεων και Μοντελοποίησης}
+\author{Κατσιγιάννης Θεόφιλος}
+\begin{document}
+\selectlanguage{greek}
+\maketitle
+\begin{center}
+\textbf{\underline{\large{Εργασία}}}
+\end{center}
+
+\end{document}
