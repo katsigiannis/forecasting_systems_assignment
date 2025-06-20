@@ -53,10 +53,23 @@ print("X_test_scaled shape:", X_test_scaled.shape)
 # Step 2: Feature selection using Spearman ##
 #############################################
 
-umap_model = umap.UMAP(n_neighbors=15, min_dist=0.1, metric='euclidean')
 X_train_scaled['DEFAULT'] = y_train.values
 
 spearman_correlation = X_train_scaled.corr(method='spearman')['DEFAULT'].drop('DEFAULT')
 selected_features = spearman_correlation[abs(spearman_correlation) > 0.2].index.tolist()
 print("Selected features:", selected_features)
 print("Number of selected features ", len(selected_features))
+
+X_train_spear = X_train_scaled[selected_features]
+X_test_spear = X_test_scaled[selected_features]
+
+#############################################
+# Step 3: UMAP Dimensionality Reduction ##
+#############################################
+
+umap_model = umap.UMAP(n_neighbors=15, min_dist=0.1, metric='euclidean', random_state=42, n_components=2)
+X_train_umap = umap_model.fit_transform(X_train_spear)
+X_test_umap = umap_model.transform(X_test_spear)
+
+print("X_train_umap shape:", X_train_umap.shape)
+print("X_test_umap shape:", X_test_umap.shape)
