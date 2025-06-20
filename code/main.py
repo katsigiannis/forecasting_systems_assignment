@@ -1,5 +1,7 @@
+import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
+from catboost import CatBoostClassifier, Pool
 
 ##############################################
 ########### Step 1: Preprocessing ############
@@ -37,5 +39,26 @@ print(X_scaled)
 ##########################################################
 ########### Step 2: Feature Selection - CatBoost #########
 ##########################################################
+model = CatBoostClassifier(
+    iterations=100,
+    learning_rate=0.1,
+    depth=2,
+    loss_function='Logloss',
+    verbose=False
+)
+model.fit(X_scaled, y)
+importance_features = model.get_feature_importance()
+
+print("\nFeature importance:")
+print(importance_features)
+
+top_features = np.argsort(importance_features)[-5:]
+print("\nTop 5 features:")
+print(top_features)
+print(len(top_features))
+
+X_selected = X_scaled[:, top_features]
+print("\nSelected features:")
+print(X_selected)
 
 
