@@ -1,6 +1,10 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
+##############################################
+########### Step 1: Preprocessing ############
+##############################################
+
 # Load dataset from disk
 CREDIT_SCORE_DATASET_PATH = "../dataset/credit_score.csv"
 df = pd.read_csv(CREDIT_SCORE_DATASET_PATH)
@@ -29,3 +33,9 @@ for column in categorical_columns:
 X_scaled = StandardScaler().fit_transform(X)
 print("\nScaled X:")
 print(X_scaled)
+
+##########################################################
+########### Step 2: Feature Selection - CatBoost #########
+##########################################################
+
+
