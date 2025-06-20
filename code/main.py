@@ -1,5 +1,6 @@
 import pandas as pd
 import umap
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 
@@ -73,3 +74,14 @@ X_test_umap = umap_model.transform(X_test_spear)
 
 print("X_train_umap shape:", X_train_umap.shape)
 print("X_test_umap shape:", X_test_umap.shape)
+
+# Plotting of the first 2 dimensions
+print("UMAP plot of the first 2 dimensions")
+plt.scatter(X_train_umap[:, 0], X_train_umap[:, 1], c=y_train, cmap='Spectral')
+plt.colorbar()
+plt.title("UMAP plot of the first 2 dimensions")
+plt.show()
+
+##################################################
+## Step 4: Supervised Learning at UMAP manifold ##
+##################################################
