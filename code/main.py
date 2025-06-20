@@ -1,4 +1,5 @@
 import pandas as pd
+import umap
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 
@@ -45,12 +46,17 @@ scaler = StandardScaler()
 X_train_scaled = pd.DataFrame(scaler.fit_transform(X_train), columns=X_train.columns)
 X_test_scaled = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
 
-print("X_train_scaled type:", type(X_train_scaled))
 print("X_train_scaled shape:", X_train_scaled.shape)
-
-print("X_test_scaled type:", type(X_test_scaled))
 print("X_test_scaled shape:", X_test_scaled.shape)
 
 #############################################
 # Step 2: Feature selection using Spearman ##
 #############################################
+
+umap_model = umap.UMAP(n_neighbors=15, min_dist=0.1, metric='euclidean')
+X_train_scaled['DEFAULT'] = y_train.values
+
+spearman_correlation = X_train_scaled.corr(method='spearman')['DEFAULT'].drop('DEFAULT')
+selected_features = spearman_correlation[abs(spearman_correlation) > 0.2].index.tolist()
+print("Selected features:", selected_features)
+print("Number of selected features ", len(selected_features))
