@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
-from sklearn.manifold import Isomap
+from sklearn.manifold import TSNE
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -71,27 +71,30 @@ print("X_train best features using spearman feature selection", X_train_spear.co
 # Step 3: UMAP Dimensionality Reduction ##
 #############################################
 smote = SMOTE(random_state=42)
-
 X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
-isomap_model = Isomap(n_neighbors=10, n_components=10)
-X_train_isomap = isomap_model.fit_transform(X_train_balanced)
-X_test_isomap = isomap_model.transform(X_test_spear)
+tsne_model = TSNE(
+    n_components=2,
+    random_state=42,
+    perplexity=30,
+    learning_rate=200,
+    n_iter=1000
+)
 
-print("X_train_isomap shape:", X_train_isomap.shape)
-print("X_test_isomap shape:", X_test_isomap.shape)
+X_train_tsne = tsne_model.fit_transform(X_train_balanced)
+print("X_train_tsne shape:", X_train_tsne.shape)
 
 #################################################################
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_isomap, y_train_balanced)
+cat_model.fit(X_train_tsne, y_train_balanced)
 
-y_pred = cat_model.predict(X_test_isomap)
+y_pred = cat_model.predict(X_train_tsne)
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Accuracy:", accuracy_score(y_train_balanced, y_pred))
 print("Classification report:")
-print(classification_report(y_test, y_pred))
+print(classification_report(y_train_balanced, y_pred))
 print("Confusion matrix:")
-print(confusion_matrix(y_test, y_pred))
+print(confusion_matrix(y_train_balanced, y_pred))
