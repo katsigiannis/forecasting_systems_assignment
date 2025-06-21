@@ -147,5 +147,25 @@
 \section{Προεπεξεργασία δεδομένων.}
 \section{Προεπιλογή χαρακτηριστικών}
 \subsection{\code{CatBoost}}
+\begin{table}[ht]
+\centering
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Μέθοδος} & \textbf{\tl{Accuracy}} & \textbf{\tl{Recall}} & \textbf{\tl{F1 }} \\
+\hline
+\tl{UMAP + Logistic} & 0.61 & 0.56 & 0.45 \\
+\tl{UMAP + CatBoost} & 0.68 & 0.31 & 0.35 \\
+\tl{UMAP + CatBoost + SMOTE} & 0.63 & 0.60 & 0.45 \\
+\tl{No DimRed + CatBoost} & 0.60 & 0.44 & 0.38 \\
+\tl{Isomap + CatBoost} & 0.64 & 0.51 & 0.44 \\
+\tl{PCA + CatBoost} & 0.65 & 0.65 & 0.51 \\
+\tl{LLE + CatBoost} & 0.61 & 0.55 & 0.44 \\
+\tl{Autoencoder (dim=5) + CatBoost} & 0.64 & 0.49 & 0.43 \\
+\tl{Autoencoder (dim=15) + CatBoost} & 0.67 & 0.54 & 0.47 \\
+\hline
+\end{tabular}
+\caption{Ακολουθιακά συστήματα που δοκιμάστηκαν}
+\label{tab:pipeline_comparison}
+\end{table}
 
 \end{document}
