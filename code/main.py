@@ -86,7 +86,7 @@ print("X_test_umap shape:", X_test_umap.shape)
 # print("UMAP plot of the first 2 dimensions")
 # plt.scatter(X_train_umap[:, 0], X_train_umap[:, 1], c=y_train, cmap='Spectral')
 # plt.colorbar()
-#   plt.title("UMAP plot of the first 2 dimensions")
+# plt.title("UMAP plot of the first 2 dimensions")
 # plt.show()
 
 #################################################################
@@ -94,9 +94,9 @@ print("X_test_umap shape:", X_test_umap.shape)
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_umap, y_train_balanced)
+cat_model.fit(X_train_umap , y_train_balanced)
 
-y_pred = cat_model.predict(X_test_umap)
+y_pred = cat_model.predict(X_test_spear)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification report:")
