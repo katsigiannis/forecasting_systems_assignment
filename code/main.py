@@ -1,11 +1,10 @@
 import pandas as pd
-import umap
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
+from sklearn.manifold import Isomap
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -75,28 +74,21 @@ smote = SMOTE(random_state=42)
 
 X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
-umap_model = umap.UMAP(n_neighbors=15, min_dist=0.1, metric='euclidean', random_state=42, n_components=5)
-X_train_umap = umap_model.fit_transform(X_train_balanced)
-X_test_umap = umap_model.transform(X_test_spear)
+isomap_model = Isomap(n_neighbors=10, n_components=10)
+X_train_isomap = isomap_model.fit_transform(X_train_balanced)
+X_test_isomap = isomap_model.transform(X_test_spear)
 
-print("X_train_umap shape:", X_train_umap.shape)
-print("X_test_umap shape:", X_test_umap.shape)
-
-# Plotting of the first 2 dimensions
-# print("UMAP plot of the first 2 dimensions")
-# plt.scatter(X_train_umap[:, 0], X_train_umap[:, 1], c=y_train, cmap='Spectral')
-# plt.colorbar()
-#   plt.title("UMAP plot of the first 2 dimensions")
-# plt.show()
+print("X_train_isomap shape:", X_train_isomap.shape)
+print("X_test_isomap shape:", X_test_isomap.shape)
 
 #################################################################
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_umap, y_train_balanced)
+cat_model.fit(X_train_isomap, y_train_balanced)
 
-y_pred = cat_model.predict(X_test_umap)
+y_pred = cat_model.predict(X_test_isomap)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification report:")
