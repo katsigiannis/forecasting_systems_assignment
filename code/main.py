@@ -80,15 +80,27 @@ X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
 # Build Autoencoder
 input_dim = X_train_balanced.shape[1]
-encoding_dim = 5
-
+encoding_dim = 15
 input_layer = Input(shape=(input_dim,))
+
+# Structure
+# encoder
 encoded = Dense(64, activation='relu')(input_layer)
+encoded = LeakyReLU(alpha=.1)(encoded)
+encoded = Dropout(0.3)(encoded)
+
 encoded = Dense(32, activation='relu')(encoded)
+encoded = LeakyReLU(alpha=.1)(encoded)
+encoded = Dropout(0.2)(encoded)
 encoded_output = Dense(encoding_dim, activation='linear')(encoded)
 
+# decoder
 decoded = Dense(32, activation='relu')(encoded_output)
+decoded = LeakyReLU(alpha=.1)(decoded)
+
 decoded = Dense(64, activation='relu')(decoded)
+decoded = LeakyReLU(alpha=.1)(decoded)
+
 decoded_output = Dense(input_dim, activation='linear')(decoded)
 
 autoencoder = Model(inputs=input_layer, outputs=decoded_output)
@@ -96,13 +108,16 @@ encoder = Model(inputs=input_layer, outputs=encoded_output)
 
 autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
 
-# Train Autoencoder
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
+# Train Autoencoder
 autoencoder.fit(X_train_balanced, X_train_balanced,
                 epochs=100,
                 batch_size=32,
                 shuffle=True,
-                validation_split=0.2
+                validation_split=0.2,
+                callbacks=[early_stopping],
+                verbose=1
                 )
 
 # Transform Data using encoder
@@ -116,7 +131,13 @@ print("X_test_encoded shape:", X_test_encoded.shape)
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
-cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
+cat_model = CatBoostClassifier(
+    iterations=1000,
+    learning_rate=0.01,
+    depth=6,
+    random_seed=42,
+    verbose=False
+)
 cat_model.fit(X_train_encoded, y_train_balanced)
 
 y_pred = cat_model.predict(X_test_encoded)
