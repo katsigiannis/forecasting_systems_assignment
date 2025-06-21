@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
-from sklearn.decomposition import PCA
+from sklearn.manifold import LocallyLinearEmbedding
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -74,18 +74,21 @@ smote = SMOTE(random_state=42)
 
 X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
-pca_model = PCA(n_components=2, random_state=42)
-X_train_pca = pca_model.fit_transform(X_train_balanced)
-X_test_pca = pca_model.transform(X_test_spear)
+lle_model = LocallyLinearEmbedding(n_components=5, n_neighbors=15, method='standard', random_state=42)
+X_train_lle = lle_model.fit_transform(X_train_balanced)
+X_test_lle = lle_model.transform(X_test_spear)
+
+print("X_train_lle shape:", X_train_lle.shape)
+print("X_test_lle shape:", X_test_lle.shape)
 
 #################################################################
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_pca, y_train_balanced)
+cat_model.fit(X_train_lle, y_train_balanced)
 
-y_pred = cat_model.predict(X_test_pca)
+y_pred = cat_model.predict(X_test_lle)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification report:")
