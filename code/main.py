@@ -1,10 +1,14 @@
 import pandas as pd
+import tensorflow as tf
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
-from sklearn.manifold import LocallyLinearEmbedding
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Dense, Dropout, LeakyReLU
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -68,27 +72,54 @@ X_test_spear = X_test_scaled[selected_features]
 print("X_train best features using spearman feature selection", X_train_spear.columns.tolist())
 
 #############################################
-# Step 3: UMAP Dimensionality Reduction ##
+# Step 3: Dimensionality Reduction ##
 #############################################
 smote = SMOTE(random_state=42)
 
 X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
-lle_model = LocallyLinearEmbedding(n_components=5, n_neighbors=15, method='standard', random_state=42)
-X_train_lle = lle_model.fit_transform(X_train_balanced)
-X_test_lle = lle_model.transform(X_test_spear)
+# Build Autoencoder
+input_dim = X_train_balanced.shape[1]
+encoding_dim = 5
 
-print("X_train_lle shape:", X_train_lle.shape)
-print("X_test_lle shape:", X_test_lle.shape)
+input_layer = Input(shape=(input_dim,))
+encoded = Dense(64, activation='relu')(input_layer)
+encoded = Dense(32, activation='relu')(encoded)
+encoded_output = Dense(encoding_dim, activation='linear')(encoded)
+
+decoded = Dense(32, activation='relu')(encoded_output)
+decoded = Dense(64, activation='relu')(decoded)
+decoded_output = Dense(input_dim, activation='linear')(decoded)
+
+autoencoder = Model(inputs=input_layer, outputs=decoded_output)
+encoder = Model(inputs=input_layer, outputs=encoded_output)
+
+autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error')
+
+# Train Autoencoder
+
+autoencoder.fit(X_train_balanced, X_train_balanced,
+                epochs=100,
+                batch_size=32,
+                shuffle=True,
+                validation_split=0.2
+                )
+
+# Transform Data using encoder
+X_train_encoded = encoder.predict(X_train_balanced)
+X_test_encoded = encoder.predict(X_test_spear)
+
+print("X_train_encoded shape:", X_train_encoded.shape)
+print("X_test_encoded shape:", X_test_encoded.shape)
 
 #################################################################
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_lle, y_train_balanced)
+cat_model.fit(X_train_encoded, y_train_balanced)
 
-y_pred = cat_model.predict(X_test_lle)
+y_pred = cat_model.predict(X_test_encoded)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification report:")
