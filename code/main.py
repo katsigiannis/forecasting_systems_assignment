@@ -3,6 +3,8 @@ import umap
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -63,6 +65,7 @@ print("Number of selected features ", len(selected_features))
 
 X_train_spear = X_train_scaled[selected_features]
 X_test_spear = X_test_scaled[selected_features]
+print("X_train best features using spearman feature selection", X_train_spear.columns.tolist())
 
 #############################################
 # Step 3: UMAP Dimensionality Reduction ##
@@ -83,5 +86,18 @@ plt.title("UMAP plot of the first 2 dimensions")
 plt.show()
 
 ##################################################
-## Step 4: Supervised Learning at UMAP manifold ##
+## Step 4: Supervised Learning at UMAP manifold using logistic ##
 ##################################################
+
+# Train a logistic regression model
+logistic_model = LogisticRegression(random_state=42, max_iter=1000, class_weight='balanced')
+print("Training a logistic regression model using UMAP dimensionality reduction with 2 features...")
+logistic_model.fit(X_train_umap, y_train)
+y_pred = logistic_model.predict(X_test_umap)
+
+# Report
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification report:")
+print(classification_report(y_test, y_pred))
+print("Confusion matrix:")
+print(confusion_matrix(y_test, y_pred))
