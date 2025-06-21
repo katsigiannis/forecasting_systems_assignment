@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from catboost import CatBoostClassifier
 from imblearn.over_sampling import SMOTE
-from sklearn.manifold import Isomap
+from sklearn.decomposition import PCA
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -74,21 +74,18 @@ smote = SMOTE(random_state=42)
 
 X_train_balanced, y_train_balanced = smote.fit_resample(X_train_spear, y_train)
 
-isomap_model = Isomap(n_neighbors=10, n_components=10)
-X_train_isomap = isomap_model.fit_transform(X_train_balanced)
-X_test_isomap = isomap_model.transform(X_test_spear)
-
-print("X_train_isomap shape:", X_train_isomap.shape)
-print("X_test_isomap shape:", X_test_isomap.shape)
+pca_model = PCA(n_components=2, random_state=42)
+X_train_pca = pca_model.fit_transform(X_train_balanced)
+X_test_pca = pca_model.transform(X_test_spear)
 
 #################################################################
 ## Step 4: Supervised Learning at UMAP manifold using catboost ##
 #################################################################
 
 cat_model = CatBoostClassifier(iterations=500, learning_rate=0.05, depth=6, random_seed=42, verbose=False)
-cat_model.fit(X_train_isomap, y_train_balanced)
+cat_model.fit(X_train_pca, y_train_balanced)
 
-y_pred = cat_model.predict(X_test_isomap)
+y_pred = cat_model.predict(X_test_pca)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
 print("Classification report:")
