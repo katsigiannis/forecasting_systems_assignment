@@ -1,5 +1,7 @@
 import pandas as pd
-import tensorflow as tf
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -143,7 +145,39 @@ cat_model.fit(X_train_encoded, y_train_balanced)
 y_pred = cat_model.predict(X_test_encoded)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
+
 print("Classification report:")
 print(classification_report(y_test, y_pred))
+
+conf_matrix = confusion_matrix(y_test, y_pred)
 print("Confusion matrix:")
-print(confusion_matrix(y_test, y_pred))
+print(conf_matrix)
+
+# PCA projection of encoded training data
+pca = PCA(n_components=2, random_state=42)
+X_train_encoded_pca = pca.fit_transform(X_train_encoded)
+
+# PCA plot
+plt.figure(figsize=(8, 6))
+sns.scatterplot(
+    x=X_train_encoded_pca[:, 0],
+    y=X_train_encoded_pca[:, 1],
+    hue=y_train_balanced,
+    palette='Set1',
+    alpha=0.7
+)
+plt.title("PCA projection of encoded training data")
+plt.xlabel("PC1")
+plt.ylabel("PC2")
+plt.legend(title="Class")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+plt.title("Confusion matrix")
+plt.xlabel("Predicted class")
+plt.ylabel("True class")
+plt.tight_layout()
+plt.show()
