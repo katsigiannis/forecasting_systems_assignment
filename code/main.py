@@ -1,3 +1,8 @@
+"""
+Warning: t-SNE is computationally expensive.
+Warning: Can apply only in full dataset once.
+"""
+
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
