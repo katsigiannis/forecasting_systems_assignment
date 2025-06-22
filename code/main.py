@@ -184,18 +184,25 @@ print("Selected features:", selected_features)
 
 # NOTE: We what to rescale and retrain the catboost algorithm
 # using the ->->initial<-<- dataset
-X_selected = df[selected_features]
+X_final = df[selected_features]
 y_final = df['DEFAULT']
-
-
-# Split data to train and test sets
-
-# modify categorical cols to numerical
-
-# scale data
-
 
 ############################################
 # Step 6: Create a new catboost classifier #
 #     and retrain with df_selected Dataset #
 ############################################
+# Split data to train and test sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X_final,
+    y_final,
+    test_size=0.2,
+    random_state=42
+)
+
+# encode categorical cols to numerical
+# NOTE: Encode train only categorical data
+# the test data will have the same index -1
+
+# scale data
+# NOTE: The test data will have scales accordingly to train data
+
