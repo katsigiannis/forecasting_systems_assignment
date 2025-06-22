@@ -1,8 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, classification_report
+from sklearn.metrics import precision_recall_curve, roc_curve, auc
 from sklearn.manifold import TSNE
 from catboost import CatBoostClassifier
 from scipy.stats import pearsonr
@@ -163,7 +165,7 @@ plt.show()
 # Step 5: Feature Selection from combined Criteria ##
 #####################################################
 # XXX: Use the scatter graph to deside the number of the features.
-top_n = 5
+top_n = 10
 
 # Take importance col with "Feature" indices
 importance = importance_df.set_index("Feature")["Importance"]
@@ -222,3 +224,87 @@ print("X_train_scaled shape:", X_train_scaled.shape)
 print("X_test_scaled shape:", X_test_scaled.shape)
 print("X_test_scaled", X_test_scaled)
 
+# Create the new catboost model
+final_model = CatBoostClassifier(
+    iterations=500,
+    learning_rate=0.05,
+    depth=6,
+    loss_function='Logloss',
+    random_seed=42,
+    verbose=False
+)
+
+# Train the model
+final_model.fit(X_train_scaled, y_train)
+y_pred = final_model.predict(X_test_scaled)
+y_pred_proba = final_model.predict_proba(X_test_scaled)[:, 1]
+
+##############################
+# Step 7: Results and plots ##
+##############################
+# Results
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("AUC:", roc_auc_score(y_test, y_pred_proba))
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+# Plots
+
+# Confusion matrix Heatmap
+plt.figure(figsize=(6, 4))
+sns.heatmap(cm, annot=True,
+            fmt='d',
+            cmap='Blues',
+            xticklabels=[0, 1],
+            yticklabels=[0, 1],
+            linewidths=1,
+            linecolor='black'
+            )
+plt.title("Confusion Matrix Heatmap")
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+# ROC curve
+fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
+roc_auc = auc(fpr, tpr)
+
+plt.figure(figsize=(6, 4))
+plt.plot(fpr, tpr, color='darkorange', lw=2, label='ROC curve (area = %0.2f)' % roc_auc)
+plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver Operating Characteristic (ROC) Curve')
+plt.legend(loc="lower right")
+plt.grid(True)
+plt.show()
+
+# Precision Recall Curve
+precision, recall, _ = precision_recall_curve(y_test, y_pred_proba)
+plt.figure(figsize=(6, 4))
+plt.plot(recall, precision, color='darkorange', lw=2, label='Precision-Recall curve')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.title('Precision-Recall Curve')
+plt.legend(loc="lower right")
+plt.grid(True)
+plt.show()
+
+# Feature Importances
+importances = final_model.get_feature_importance()
+feature_labels = selected_features
+
+plt.figure(figsize=(8, 5))
+sns.barplot(x=importances, y=feature_labels, orient='h')
+plt.title("Feature Importances")
+plt.xlabel("Importance")
+plt.ylabel("Feature")
+plt.tight_layout()
+plt.show()
