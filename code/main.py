@@ -11,12 +11,13 @@ from scipy.stats import pearsonr
 # Step 0: We are creating some helpful functions #
 ##################################################
 
-def modify_categorical_cols(x):
+def modify_categorical_cols(x, t=pd.DataFrame()):
     """
     Converts categorical columns in a DataFrame to numerical values using OrdinalEncoder.
 
     Args:
         x (pd.DataFrame): Input DataFrame containing categorical columns
+        t (pd.DataFrame): Optional DataFrame to encode using same encoder as x
 
     Returns:
         pd.DataFrame: DataFrame with categorical columns converted to numerical values
@@ -25,22 +26,29 @@ def modify_categorical_cols(x):
     categorical_columns = x.select_dtypes(include=['object']).columns
     encoder = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
     x[categorical_columns] = encoder.fit_transform(x[categorical_columns])
-    return x
+    if not t.empty:
+        t[categorical_columns] = encoder.transform(t[categorical_columns])
+    return x,t
 
-def scale_dataset(x):
+def scale_dataset(x, t=pd.DataFrame()):
     """
     Scales numerical features in a DataFrame using StandardScaler.
 
     Args:
         x (pd.DataFrame): Input DataFrame containing numerical features to be scaled
+        t (pd.DataFrame): Optional DataFrame to scale using the same scaler as x
 
     Returns:
         pd.DataFrame: DataFrame with scaled numerical features, maintaining original column names
     """
 
     # NOTE: we are using fit_transform and transform for X_train and X_test correspondingly
+    t_scal = pd.DataFrame()
     scaler = StandardScaler()
-    return pd.DataFrame(scaler.fit_transform(x), columns=x.columns)
+    x_scal = pd.DataFrame(scaler.fit_transform(x), columns=x.columns)
+    if not t.empty:
+        t_scal = pd.DataFrame(scaler.transform(t), columns=t.columns)
+    return x_scal, t_scal
 
 #################################################
 # Step 1: Load Dataset - Split - Preprocessing ##
@@ -70,10 +78,10 @@ print(y.isnull().sum())
 X = X.copy()
 
 # Categorical to numerical labels to X
-X = modify_categorical_cols(X)
+X, _ = modify_categorical_cols(X)
 
 # Scale dataset
-X_scaled = scale_dataset(X)
+X_scaled, _ = scale_dataset(X)
 print("X_train_scaled shape:", X_scaled.shape)
 
 ###########################
@@ -203,6 +211,14 @@ X_train, X_test, y_train, y_test = train_test_split(
 # NOTE: Encode train only categorical data
 # the test data will have the same index -1
 
+X_train_encoded, X_test_encoded = modify_categorical_cols(X_train, X_test)
+print("X_train_encoded shape:", X_train_encoded.shape)
+print("X_test_encoded shape:", X_test_encoded.shape)
+
 # scale data
 # NOTE: The test data will have scales accordingly to train data
+X_train_scaled, X_test_scaled = scale_dataset(X_train_encoded, X_test_encoded)
+print("X_train_scaled shape:", X_train_scaled.shape)
+print("X_test_scaled shape:", X_test_scaled.shape)
+print("X_test_scaled", X_test_scaled)
 
