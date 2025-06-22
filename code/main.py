@@ -166,7 +166,7 @@ plt.show()
 # Step 5: Feature Selection from combined Criteria ##
 #####################################################
 # XXX: Use the scatter graph to deside the number of the features.
-top_n = 10
+top_n = 16
 
 # Take importance col with "Feature" indices
 importance = importance_df.set_index("Feature")["Importance"]
