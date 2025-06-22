@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import shap
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix, roc_auc_score, classification_report
@@ -308,3 +309,10 @@ plt.xlabel("Importance")
 plt.ylabel("Feature")
 plt.tight_layout()
 plt.show()
+
+# Shap
+explainer = shap.TreeExplainer(final_model)
+shap_values = explainer.shap_values(X_test_scaled)
+
+shap.summary_plot(shap_values, X_test_scaled, plot_type="bar", feature_names=selected_features)
+shap.summary_plot(shap_values, X_test_scaled, plot_type="dot", feature_names=selected_features)
