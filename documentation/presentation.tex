@@ -1,0 +1,239 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[greek]{babel}
+\usepackage{graphicx}
+\usetheme{Madrid}
+
+\newcommand{\tl}[1]{\textlatin{#1}}
+\newcommand{\place}[1]{images/#1.png}
+\setbeamertemplate{headline}{}
+
+
+
+\title{Ανάλυση Πιστωτικού Κινδύνου με Μηχανική Μάθηση}
+\author{Κατσιγιάννης Θεόφιλος}
+\date{Ιούνιος 2025}
+
+\begin{document}
+
+\frame{\titlepage}
+% Slide 2 - Περιεχόμενα
+\begin{frame}{Περιεχόμενα}
+\tableofcontents
+\end{frame}
+
+\section{Εισαγωγή}
+% Slide 1
+\begin{frame}{Εισαγωγή}
+\begin{itemize}
+  \item Ανάλυση τραπεζικού κινδύνου
+  \item Σύγκριση μοντέλων
+  \item \tl{Dataset} από \tl{Kaggle}: \tl{Credit Score}
+\end{itemize}
+\end{frame}
+% Slide 2
+\begin{frame}{Το \tl{Dataset}}
+Στο πλαίσιο της παρούσας εργασίας χρησιμοποιήθηκε το σύνολο δεδομένων \textlatin{"Credit Score"} που είναι διαθέσιμο μέσω της πλατφόρμας \textlatin{Kaggle (Conor Sully, 2023)}.
+
+\vspace{0.3cm}
+Το σύνολο περιλαμβάνει 1.000 παρατηρήσεις και 87 χαρακτηριστικά, τα οποία αφορούν:
+\begin{itemize}
+  \item δημογραφικά και οικονομικά δεδομένα
+  \item δείκτες συμπεριφοράς καταναλωτή
+  \item ποσοτικά \textlatin{ratios} (π.χ. \textlatin{R\_HEALTH\_SAVINGS, R\_ENTERTAINMENT, R\_TAX\_DEBT})
+\end{itemize}
+
+\vspace{0.3cm}
+Η μεταβλητή στόχος είναι η \textlatin{DEFAULT}, δυαδική: (0 = χωρίς αθέτηση, 1 = αθέτηση πληρωμής).
+\end{frame}
+\begin{frame}{Το \tl{Dataset}}
+Το \textlatin{dataset} είναι συνθετικό αλλά ρεαλιστικό και κατάλληλο για ταξινόμηση, επιλογή χαρακτηριστικών και τεχνικές όπως:
+\textlatin{CatBoost, SHAP, t-SNE}.
+
+\vspace{0.2cm}
+Η εργασία βασίζεται σε συνδυασμό αυτών μεθόδων σε συσχέτιση με το \textlatin{paper}.
+\end{frame}
+\section{Η Βασική Πειραματική Δομή}
+% Slide 7
+\begin{frame}{\tl{Pipeline} - Γενική Δομή}
+\begin{itemize}
+  \item Προεπεξεργασία \(\to\) Επιλογή χαρακτηριστικών \(\to\) Υποβιβασμός διάστασης \(\to\) Μοντέλο
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{\place{graph1}}
+\caption{Η γενική μορφή της ακολουθίας μάθησης}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+
+\section{Βασικά Εργαλεία-Δομές Αλγορίθμων}
+
+\begin{frame}{\tl{Pearson-Correlation Analysis}}
+Η \textlatin{Pearson-Correlation Analysis} χρησιμοποιεί τον δείκτη \textlatin{Pearson} για να παραλείψει χαρακτηριστικά (\textlatin{feature selection}) χωρίς γραμμική σχέση με τη στήλη στόχο.
+
+\vspace{0.2cm}
+Αποτελεί βασική τεχνική προεπεξεργασίας,για βελτιωμένο \textlatin{feature selection}.
+\end{frame}
+
+\begin{frame}{\tl{Manifold Learning} – Μέρος Α}
+\begin{description}
+ \item[\tl{PCA}] Γραμμική μείωση διαστάσεων. Συμπύκνωση πληροφορίας με βάση τις κύριες ιδιοτιμές του πίνακα συνδιακύμανσης.
+ \item[\tl{Isomap}] Μη γραμμική μείωση με διατήρηση γεωδαιτικών αποστάσεων στον χώρο χαμηλών διαστάσεων (\textlatin{manifold}).
+ \item[\tl{LLE}] Διατηρεί την τοπική γεωμετρία. Παρόμοιος με τον \textlatin{Isomap}.
+\end{description}
+\end{frame}
+
+\begin{frame}{\tl{Manifold Learning} – Μέρος Β}
+\begin{description}
+ \item[\tl{UMAP}] Διατηρεί τοπική και σφαιρική δομή. Υποθέτει πολλαπλότητα και προσπαθεί να χαρτογραφήσει τη γεωμετρία και σχέσεις γειτονίας.
+ \item[\tl{t-SNE}] Για οπτικοποίηση σε 2–3 διαστάσεις. Προσπαθεί να διατηρήσει τις τοπικές σχέσεις.
+ \item[\tl{Autoencoders}] Νευρωνικά δίκτυα για υποβιβασμό διάστασης. Ο \textlatin{encoder} χαρτογραφεί σε \textlatin{latent space}, ο \textlatin{decoder} αποκαθιστά την είσοδο.
+\end{description}
+\end{frame}
+
+\begin{frame}{Αλγόριθμοι Μηχανικής Μάθησης}
+\begin{description}
+ \item[\tl{CatBoost}] \textlatin{Boosted decision trees}. Χαρακτηριστικά:
+ \begin{itemize}
+  \item Αυτόματη διαχείριση κατηγορικών μεταβλητών
+  \item Υψηλή ακρίβεια, χαμηλή υπερπροσαρμογή
+  \item Υποστήριξη \textlatin{CPU/GPU}
+  \item Ελάχιστη παραμετρικοποίηση
+  \item Ιδανικός για \textlatin{classification/regression}
+ \end{itemize}
+ \item[\tl{Logistic Regression}] Υπολογίζει πιθανότητες ανήκειν σε κατηγορία: αν \(p > 0.5 \rightarrow 1\), αλλιώς \( \rightarrow 0 \)
+\end{description}
+\end{frame}
+
+\begin{frame}{Βοηθητικά Εργαλεία}
+\begin{description}
+ \item[\tl{SMOTE}] Για \textlatin{class imbalance}. Δημιουργεί τεχνητά δείγματα μειοψηφικής κατηγορίας με παρεμβολή μεταξύ γειτόνων.
+ \item[\tl{SHAP}] Για ερμηνεία προβλέψεων. Χρησιμοποιεί \textlatin{Shapley values} για να ποσοτικοποιήσει τη συμβολή κάθε χαρακτηριστικού.
+\end{description}
+\end{frame}
+\section{Συνοπτικά αποτελέσματα πειραμάτων}
+\begin{frame}{Συνοπτικά αποτελέσματα πειραμάτων}
+\begin{table}[ht]
+\centering
+\resizebox{0.8\textwidth}{!}{%
+\begin{tabular}{l|c|c|c|c|c|c|c}
+\textbf{Μοντέλο} & \textbf{\textlatin{Accuracy}} & \textbf{\textlatin{Prec}. 0} & \textbf{\textlatin{Recall} 0} & \textbf{\textlatin{F1} 0} & \textbf{\textlatin{Prec}. 1} & \textbf{\textlatin{Recall} 1} & \textbf{\textlatin{F1} 1} \\
+\hline
+\textlatin{CatBoost} & 0.603 & 0.75 & 0.67 & 0.71 & 0.34 & 0.44 & 0.38 \\
+\textlatin{UMAP,Logistic} & 0.613 & 0.79 & 0.63 & 0.70 & 0.38 & 0.57 & 0.45 \\
+\textlatin{UMAP, CatBoost} & 0.650 & 0.79 & 0.70 & 0.74 & 0.40 & 0.52 & 0.46 \\
+\textlatin{Isomap, CatBoost} & 0.643 & 0.79 & 0.69 & 0.74 & 0.39 & 0.51 & 0.45 \\
+\textlatin{LLE, CatBoost} & 0.613 & 0.78 & 0.64 & 0.70 & 0.37 & 0.55 & 0.44 \\
+\textlatin{PCA, CatBoost} & 0.647 & 0.83 & 0.64 & 0.72 & 0.42 & 0.65 & 0.51 \\
+\textlatin{Autoencoder, CatBoost} & 0.630 & 0.78 & 0.67 & 0.72 & 0.38 & 0.52 & 0.44 \\
+\end{tabular}%
+}
+\caption{Συγκριτικός πίνακας αποτελεσμάτων μοντέλων}
+\end{table}
+\begin{itemize}
+  \item \tl{PCA+CatBoost}: καλύτερη ισορροπία
+  \item \tl{UMAP+CatBoost}: υψηλό \tl{accuracy}
+\end{itemize}
+\end{frame}
+\section{Το \tl{paper}}
+\begin{frame}{Βιβλιογραφική Αναφορά}
+\small
+\begin{itemize}
+  \item \textbf{Τίτλος:} \\
+  \textit{\tl{A hybrid machine learning framework by incorporating categorical boosting and manifold learning for financial analysis}}
+
+  \item \textbf{Συγγραφείς:} \tl{Yuyang Zhao} και \tl{Hongbo Zhao}
+
+  \item \textbf{Περιοδικό:} \textit{\tl{Intelligent Systems with Applications}}, Τόμος 25, Σελίδα 200473
+
+  \item \textbf{Έτος:} 2025
+
+  \item \textbf{Εκδότης:} \tl{Elsevier}
+
+  \item \textbf{Διαθέσιμο \tl{online}:} 27 Δεκεμβρίου 2024
+
+\end{itemize}
+\end{frame}
+
+\section{Η βασική δομή του πειράματος}
+\begin{frame}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.2]{\place{graph2}}
+\caption{Η γενική μορφή της ακολουθίας μάθησης}
+\end{figure}
+\end{frame}
+
+\section{Συνολικά Αποτελέσματα}
+\begin{frame}{Συνοπτικά αποτελέσματα πειραμάτων}
+\begin{table}[ht]
+\centering
+\resizebox{0.8\textwidth}{!}{%
+\begin{tabular}{l|c|c|c|c|c|c|c}
+\textbf{Μοντέλο} & \textbf{\textlatin{Accuracy}} & \textbf{\textlatin{Prec}. 0} & \textbf{\textlatin{Recall} 0} & \textbf{\textlatin{F1} 0} & \textbf{\textlatin{Prec}. 1} & \textbf{\textlatin{Recall} 1} & \textbf{\textlatin{F1} 1} \\
+\hline
+\textlatin{CatBoost} & 0.603 & 0.75 & 0.67 & 0.71 & 0.34 & 0.44 & 0.38 \\
+\textlatin{UMAP,Logistic} & 0.613 & 0.79 & 0.63 & 0.70 & 0.38 & 0.57 & 0.45 \\
+\textlatin{UMAP, CatBoost} & 0.650 & 0.79 & 0.70 & 0.74 & 0.40 & 0.52 & 0.46 \\
+\textlatin{Isomap, CatBoost} & 0.643 & 0.79 & 0.69 & 0.74 & 0.39 & 0.51 & 0.45 \\
+\textlatin{LLE, CatBoost} & 0.613 & 0.78 & 0.64 & 0.70 & 0.37 & 0.55 & 0.44 \\
+\textlatin{PCA, CatBoost} & 0.647 & 0.83 & 0.64 & 0.72 & 0.42 & 0.65 & 0.51 \\
+\textlatin{Autoencoder, CatBoost} & 0.630 & 0.78 & 0.67 & 0.72 & 0.38 & 0.52 & 0.44 \\
+\textbf{\textlatin{Paper (CatBoost, t-SNE)}} & \textbf{0.720} & \textbf{0.77} & \textbf{0.88} & \textbf{0.82} & \textbf{0.47} & \textbf{0.28} & \textbf{0.35}
+\end{tabular}%
+}
+\caption{Συγκριτικός πίνακας αποτελεσμάτων μοντέλων}
+\end{table}
+\end{frame}
+\begin{frame}{Τα αποτελέσματα από \tl{t-SNE}}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.25]{\place{Figure_10}}
+\end{figure}
+Η απεικόνιση \tl{t-SNE} των δειγμάτων δείχνει ότι τα δείγματα της μειοψηφικής κατηγορίας (\tl{Default = 1}, κόκκινο) δεν σχηματίζουν ευδιάκριτα συμπλέγματα, αλλά εμφανίζονται εντός περιοχών που κυριαρχούνται από την πλειοψηφική κατηγορία. Αυτό εξηγεί τις δυσκολίες στην ταξινόμηση με χρήση γραμμικών ή δέντρων-βασισμένων μοντέλων, και υποδηλώνει την ανάγκη για ενίσχυση ή επαναδειγματοληψία της κλάσης 1.
+\end{frame}
+\begin{frame}{\tl{ROC curve}}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{\place{Figure_12}}
+\caption{\tl{ROC curve}}
+\end{figure}
+Από το παραπάνω γράφημα, ο ταξινομητής έχει περιορισμένη ικανότητα διάκρισης μεταξύ \tl{good} και \tl{bad loaners}.
+\end{frame}
+\begin{frame}{\tl{Precision vs Recall}}
+Από το παραπάνω γράφημα, ο ταξινομητής έχει περιορισμένη ικανότητα διάκρισης μεταξύ \tl{good} και \tl{bad loaners}.
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{\place{Figure_13}}
+\caption{\tl{precision-recall curve}}
+\end{figure}
+Από το παραπάνω δίαγραμμα,το μοντέλο έχει δυσκολία να προβλέψει τα \tl{defaults} με αξιοπρεπή \tl{recall} χωρίς να θυσιάζει την ακρίβεια. Αυτό επιβεβαιώνει την ασυμμετρία και πολυπλοκότητα του προβλήματος.
+\end{frame}
+
+\begin{frame}{\tl{SHAP Diagram}}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{\place{Figure_15}}
+\caption{Γράφημα \tl{SHAP}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{\tl{SHAP Diagram}}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.3]{\place{Figure_16}}
+\caption{Γράφημα \tl{SHAP}}
+\end{figure}
+\end{frame}
+
+\section{Γενικά Συμπεράσματα}
+% Slide 20
+\begin{frame}{Συμπεράσματα}
+\begin{itemize}
+  \item Χρήσιμες τεχνικές: \tl{PCA}, \tl{Autoencoders}, \tl{CatBoost}
+  \item Ερμηνευσιμότητα με \tl{SHAP}
+  \item Υπάρχει πρόκληση στην πρόβλεψη της κατηγορίας \(1\).
+\end{itemize}
+\end{frame}
+\end{document}

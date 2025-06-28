@@ -22,7 +22,7 @@ df = pd.read_csv(CREDIT_SCORE_DATASET_PATH)
 print("Dataset dimensions:", df.shape)
 print("Column names:", df.columns.tolist())
 
-X = df.drop(columns=['DEFAULT', 'CUST_ID'])
+X = df.drop(columns=['DEFAULT', 'CUST_ID', 'CREDIT_SCORE'])
 y = df['DEFAULT']
 
 
